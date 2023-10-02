@@ -88,7 +88,14 @@ app.post("/api/users", async (req, res) => {
   const username = req.body.username;
   const foundUser = await User.findOne({ username });
   if (foundUser) {
-    res.json(foundUser);
+    res.json({
+      message:
+        "User with this username already exists, please use different one",
+    });
+  } else if (username === "") {
+    res.json({
+      message: "Please enter valid username before submiting the form",
+    });
   } else {
     const user = await User.create({
       username,
@@ -108,28 +115,46 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
     foundUser = null;
   }
   if (!foundUser) {
-    res.json({ message: "No user exists with that ID" });
+    res.json({ message: "No user exists with entered ID" });
+  } else if (!description && !duration) {
+    res.json({
+      message:
+        "Please enter valid description and duration before submitting the form",
+    });
+  } else if (!description) {
+    res.json({
+      message: "Please enter valid description before submitting the form",
+    });
+  } else if (!duration) {
+    res.json({
+      message: "Please enter valid duration before submitting the form",
+    });
+  } else if (isNaN(duration)) {
+    res.json({
+      message: "Please use valid number for duration",
+    });
+  } else {
+    if (!date) {
+      date = new Date();
+    }
+    if (date) {
+      date = new Date(date);
+    }
+    await Exercise.create({
+      username: foundUser.username,
+      description,
+      duration,
+      date,
+      userId,
+    });
+    res.send({
+      username: foundUser.username,
+      description,
+      duration,
+      date: date.toDateString(),
+      userId,
+    });
   }
-  if (!date) {
-    date = new Date();
-  }
-  if (date) {
-    date = new Date(date);
-  }
-  await Exercise.create({
-    username: foundUser.username,
-    description,
-    duration,
-    date,
-    userId,
-  });
-  res.send({
-    username: foundUser.username,
-    description,
-    duration,
-    date: date.toDateString(),
-    userId,
-  });
 });
 
 const listener = app.listen(process.env.PORT || 3000, () => {
