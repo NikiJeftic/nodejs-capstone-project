@@ -79,7 +79,7 @@ app.get("/api/users/:_id/logs", async (req, res) => {
     }));
     res.json({
       username: foundUser.username,
-      count: count.length,
+      count: from || to ? count.length : undefined,
       _id: userId,
       log: exercises,
     });
