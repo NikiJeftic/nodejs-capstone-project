@@ -56,6 +56,8 @@ app.get("/api/users/:_id/logs", async (req, res) => {
     res.status(404).json({ message: "No user exists with that ID" });
   } else {
     let filter = { userId };
+    let count = await Exercise.find(filter).sort({ date: 1 });
+
     let dateFilter = {};
     if (from) {
       dateFilter["$gte"] = new Date(from);
@@ -77,7 +79,7 @@ app.get("/api/users/:_id/logs", async (req, res) => {
     }));
     res.json({
       username: foundUser.username,
-      count: exercises.length,
+      count: count.length,
       _id: userId,
       log: exercises,
     });
