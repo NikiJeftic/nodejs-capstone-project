@@ -56,7 +56,6 @@ app.get("/api/users/:_id/logs", async (req, res) => {
     res.status(404).json({ message: "No user exists with that ID" });
   } else {
     let filter = { userId };
-    let count = await Exercise.find(filter).sort({ date: 1 });
 
     let dateFilter = {};
     if (from) {
@@ -71,6 +70,7 @@ app.get("/api/users/:_id/logs", async (req, res) => {
     if (!limit) {
       limit = 100;
     }
+    let count = await Exercise.find(filter).sort({ date: 1 });
     let exercises = await Exercise.find(filter).sort({ date: 1 }).limit(limit);
     exercises = exercises.map((exercise) => ({
       description: exercise.description,
