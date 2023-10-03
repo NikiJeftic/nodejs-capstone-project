@@ -53,34 +53,35 @@ app.get("/api/users/:_id/logs", async (req, res) => {
     foundUser = null;
   }
   if (!foundUser) {
-    res.json({ message: "No user exists with that ID" });
+    res.status(404).json({ message: "No user exists with that ID" });
+  } else {
+    let filter = { userId };
+    let dateFilter = {};
+    if (from) {
+      dateFilter["$gte"] = new Date(from);
+    }
+    if (to) {
+      dateFilter["$lte"] = new Date(to);
+    }
+    if (from || to) {
+      filter.date = dateFilter;
+    }
+    if (!limit) {
+      limit = 100;
+    }
+    let exercises = await Exercise.find(filter).sort({ date: 1 }).limit(limit);
+    exercises = exercises.map((exercise) => ({
+      description: exercise.description,
+      duration: exercise.duration,
+      date: exercise.date.toDateString(),
+    }));
+    res.json({
+      username: foundUser.username,
+      count: exercises.length,
+      _id: userId,
+      log: exercises,
+    });
   }
-  let filter = { userId };
-  let dateFilter = {};
-  if (from) {
-    dateFilter["$gte"] = new Date(from);
-  }
-  if (to) {
-    dateFilter["$lte"] = new Date(to);
-  }
-  if (from || to) {
-    filter.date = dateFilter;
-  }
-  if (!limit) {
-    limit = 100;
-  }
-  let exercises = await Exercise.find(filter).sort({ date: 1 }).limit(limit);
-  exercises = exercises.map((exercise) => ({
-    description: exercise.description,
-    duration: exercise.duration,
-    date: exercise.date.toDateString(),
-  }));
-  res.json({
-    username: foundUser.username,
-    count: exercises.length,
-    _id: userId,
-    log: exercises,
-  });
 });
 
 // POST to /api/users username
@@ -88,19 +89,19 @@ app.post("/api/users", async (req, res) => {
   const username = req.body.username;
   const foundUser = await User.findOne({ username });
   if (foundUser) {
-    res.json({
+    res.status(409).json({
       message:
-        "User with this username already exists, please use different one",
+        "User with this username already exists, please use a different one",
     });
   } else if (username === "") {
-    res.json({
-      message: "Please enter valid username before submiting the form",
+    res.status(400).json({
+      message: "Please enter a valid username before submitting the form",
     });
   } else {
     const user = await User.create({
       username,
     });
-    res.json(user);
+    res.status(201).json(user);
   }
 });
 
@@ -115,27 +116,27 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
     foundUser = null;
   }
   if (!foundUser) {
-    res.json({ message: "No user exists with entered ID" });
+    res.status(404).json({ message: "No user exists with entered ID" });
   } else if (!description && !duration) {
-    res.json({
+    res.status(400).json({
       message:
         "Please enter valid description and duration before submitting the form",
     });
   } else if (!description) {
-    res.json({
+    res.status(400).json({
       message: "Please enter valid description before submitting the form",
     });
   } else if (!duration) {
-    res.json({
+    res.status(400).json({
       message: "Please enter valid duration before submitting the form",
     });
   } else if (isNaN(duration)) {
-    res.json({
-      message: "Please use valid number for duration",
+    res.status(400).json({
+      message: "Please use a valid number for duration",
     });
   } else if (isInvalidDate(date)) {
-    res.json({
-      message: "Please enter valid date",
+    res.status(400).json({
+      message: "Please enter a valid date format",
     });
   } else {
     if (!date) {
@@ -151,7 +152,7 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
       date,
       userId,
     });
-    res.send({
+    res.status(201).json({
       username: foundUser.username,
       description,
       duration,
