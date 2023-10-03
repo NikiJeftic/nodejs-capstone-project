@@ -133,6 +133,10 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
     res.json({
       message: "Please use valid number for duration",
     });
+  } else if (isInvalidDate(date)) {
+    res.json({
+      message: "Please enter valid date",
+    });
   } else {
     if (!date) {
       date = new Date();
@@ -160,3 +164,11 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);
 });
+
+function isInvalidDate(dateString) {
+  const date = new Date(dateString);
+
+  return (
+    isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== dateString
+  );
+}
