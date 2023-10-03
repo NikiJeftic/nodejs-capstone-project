@@ -69,7 +69,7 @@ app.get("/api/users/:_id/logs", async (req, res) => {
   if (!limit) {
     limit = 100;
   }
-  let exercises = await Exercise.find(filter).limit(limit);
+  let exercises = await Exercise.find(filter).sort({ date: 1 }).limit(limit);
   exercises = exercises.map((exercise) => ({
     description: exercise.description,
     duration: exercise.duration,
