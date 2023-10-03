@@ -134,7 +134,7 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
     res.status(400).json({
       message: "Please use a valid number for duration",
     });
-  } else if (isInvalidDate(date)) {
+  } else if (date && isInvalidDate(date)) {
     res.status(400).json({
       message: "Please enter a valid date format",
     });
